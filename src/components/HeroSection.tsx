@@ -42,74 +42,7 @@ export const HeroSection = () => {
         }}
       />
 
-      {/* Floating Processing Card - Left */}
-      <motion.div
-        className="absolute left-[5%] top-1/3 hidden lg:block"
-        initial={{ opacity: 0, x: -50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 0.8, duration: 0.8 }}
-        style={{ y }}
-      >
-        <motion.div
-          className="floating-card flex items-center gap-3"
-          animate={{ y: [0, -15, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
-            <Settings className="w-5 h-5 text-accent" />
-          </div>
-          <div>
-            <p className="text-sm text-foreground">Processing...</p>
-            <div className="w-32 h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
-              <motion.div
-                className="h-full bg-gradient-to-r from-accent to-accent/50 rounded-full"
-                animate={{ width: ["0%", "100%"] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </div>
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* Floating Latency Card - Right */}
-      <motion.div
-        className="absolute right-[5%] bottom-1/3 hidden lg:block"
-        initial={{ opacity: 0, x: 50 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ delay: 1, duration: 0.8 }}
-        style={{ y }}
-      >
-        <motion.div
-          className="floating-card"
-          animate={{ y: [0, 15, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">Latency</span>
-            <span className="text-sm text-success font-mono">12ms</span>
-          </div>
-          <div className="flex gap-1">
-            {[...Array(8)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="w-3 h-6 rounded-sm"
-                style={{
-                  backgroundColor: i < 5 ? 'hsl(145 80% 45%)' : 'hsl(145 80% 45% / 0.3)',
-                }}
-                animate={i < 5 ? {
-                  height: [24, 16, 24],
-                } : {}}
-                transition={{
-                  duration: 0.8,
-                  repeat: Infinity,
-                  delay: i * 0.1,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
-          </div>
-        </motion.div>
-      </motion.div>
+ 
 
       {/* Main Content */}
       <motion.div
@@ -124,8 +57,7 @@ export const HeroSection = () => {
           transition={{ duration: 1, ease: "easeOut" }}
           whileHover={{ scale: 1.02 }}
         >
-          <span className="text-gradient block transition-all duration-500 group-hover:drop-shadow-[0_0_60px_rgba(0,200,180,0.8)] group-hover:text-white">BRAIN</span>
-          <span className="text-gradient block transition-all duration-500 group-hover:drop-shadow-[0_0_60px_rgba(50,220,120,0.8)] group-hover:text-white">VOICE</span>
+          <span className="text-gradient block transition-all duration-500 group-hover:drop-shadow-[0_0_60px_rgba(0,200,180,0.8)] group-hover:text-white">BRAIN VOICE</span>
         </motion.h1>
 
         {/* Tagline */}
