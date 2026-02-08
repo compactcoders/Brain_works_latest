@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import logo from "@/assets/logo.png"; // or .svg
 
 export const Footer = () => {
   const footerLinks = {
@@ -14,18 +15,22 @@ export const Footer = () => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
           {/* Logo & Description */}
           <div className="col-span-2 md:col-span-1">
-            <motion.a
-              href="#home"
-              className="flex items-center gap-2 mb-4"
-              whileHover={{ scale: 1.05 }}
-            >
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-primary-foreground">
-                B
-              </div>
-              <span className="font-display font-bold text-xl">
-                BrainVoice<span className="text-primary">.AI</span>
-              </span>
-            </motion.a>
+           <motion.a
+  href="#home"
+  className="flex items-center gap-2"
+  whileHover={{ scale: 1.05 }}
+>
+  <img
+    src={logo}
+    alt="BrainVoice AI Logo"
+    className="w-8 h-8 object-contain"
+    draggable="false"
+  />
+
+  <span className="font-display font-bold text-xl">
+    BrainVoice.AI
+  </span>
+</motion.a>
             <p className="text-sm text-muted-foreground">
               Architecting the neural pathways of the future enterprise.
             </p>
