@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
-import { ArrowRight, ArrowLeft, Play } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { ArrowLeft, ArrowRight, Play } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const industries = [
   {
@@ -25,36 +25,82 @@ const industries = [
   },
 ];
 
+const CARD_WIDTH = 360;
+const GAP = 24;
+const AUTO_DELAY = 3500;
+const RESUME_DELAY = 400;
+
+/* Infinite loop setup */
+const LOOPED = [...industries, ...industries, ...industries];
+const START_INDEX = industries.length;
+
 export const IndustriesSection = () => {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
+  const [index, setIndex] = useState(START_INDEX);
+  const [animate, setAnimate] = useState(true);
+  const [isHovering, setIsHovering] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const checkScrollButtons = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
+  /* ---------- Autoplay (controlled) ---------- */
+  const startAutoplay = () => {
+    stopAutoplay();
+    timerRef.current = setTimeout(() => {
+      setIndex((i) => i + 1);
+    }, AUTO_DELAY);
   };
 
-  const scroll = (direction: 'left' | 'right') => {
-    if (scrollRef.current) {
-      const scrollAmount = 340;
-      scrollRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth',
-      });
-      setTimeout(checkScrollButtons, 300);
-    }
+  const stopAutoplay = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
   };
+
+  useEffect(() => {
+    if (!isHovering) startAutoplay();
+    return stopAutoplay;
+  }, [index, isHovering]);
+
+  /* ---------- Seamless infinite reset ---------- */
+  useEffect(() => {
+    if (index >= START_INDEX + industries.length) {
+      setTimeout(() => {
+        setAnimate(false);
+        setIndex(START_INDEX);
+      }, 450);
+    }
+
+    if (index < START_INDEX) {
+      setTimeout(() => {
+        setAnimate(false);
+        setIndex(START_INDEX + industries.length - 1);
+      }, 450);
+    }
+  }, [index]);
+
+  useEffect(() => {
+    if (!animate) requestAnimationFrame(() => setAnimate(true));
+  }, [animate]);
+
+  /* ---------- Manual navigation ---------- */
+  const goNext = () => {
+    stopAutoplay();
+    setIndex((i) => i + 1);
+    setTimeout(startAutoplay, RESUME_DELAY);
+  };
+
+  const goPrev = () => {
+    stopAutoplay();
+    setIndex((i) => i - 1);
+    setTimeout(startAutoplay, RESUME_DELAY);
+  };
+
+  const centerOffset = CARD_WIDTH + GAP;
+  const x = -(index * (CARD_WIDTH + GAP)) + centerOffset;
 
   return (
     <section id="industries" className="py-24 relative overflow-hidden">
       <div className="container mx-auto px-6">
+        {/* Header */}
         <motion.div
           className="text-center mb-16"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
@@ -67,69 +113,106 @@ export const IndustriesSection = () => {
           </p>
         </motion.div>
 
-        {/* Industry Cards Carousel with Arrow Navigation */}
-        <div className="relative">
-          {/* Left Arrow */}
+        {/* Carousel */}
+        <div
+          className="relative"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          {/* Arrows */}
           <motion.button
-            onClick={() => scroll('left')}
-            className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full glass-card flex items-center justify-center transition-opacity ${canScrollLeft ? 'opacity-100' : 'opacity-30 cursor-not-allowed'}`}
-            whileHover={canScrollLeft ? { scale: 1.1 } : {}}
-            whileTap={canScrollLeft ? { scale: 0.95 } : {}}
-            disabled={!canScrollLeft}
+            onClick={goPrev}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full glass-card flex items-center justify-center"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ArrowLeft className="w-5 h-5 text-foreground" />
+            <ArrowLeft className="w-5 h-5" />
           </motion.button>
 
-          {/* Right Arrow */}
           <motion.button
-            onClick={() => scroll('right')}
-            className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full glass-card flex items-center justify-center transition-opacity ${canScrollRight ? 'opacity-100' : 'opacity-30 cursor-not-allowed'}`}
-            whileHover={canScrollRight ? { scale: 1.1 } : {}}
-            whileTap={canScrollRight ? { scale: 0.95 } : {}}
-            disabled={!canScrollRight}
+            onClick={goNext}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 rounded-full glass-card flex items-center justify-center"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
-            <ArrowRight className="w-5 h-5 text-foreground" />
+            <ArrowRight className="w-5 h-5" />
           </motion.button>
 
-          <div 
-            ref={scrollRef}
-            onScroll={checkScrollButtons}
-            className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory scrollbar-hide px-14"
-          >
-            {industries.map((industry, index) => (
-              <motion.div
-                key={industry.title}
-                className="flex-shrink-0 w-80 snap-center"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-              >
-                <motion.div
-                  className="glass-card p-6 h-full group cursor-pointer"
-                  whileHover={{ y: -10, scale: 1.02 }}
-                  transition={{ type: 'spring', stiffness: 300 }}
-                >
-                  {/* Card Image Placeholder */}
-                  <div className={`h-40 rounded-xl bg-gradient-to-br ${industry.gradient} mb-6 flex items-center justify-center overflow-hidden relative`}>
-                    <motion.div
-                      className="absolute inset-0 bg-background/20"
-                      whileHover={{ opacity: 0 }}
-                    />
-                    <Play className="w-12 h-12 text-background/50" />
-                  </div>
+          {/* Track */}
+          <div className="overflow-hidden max-w-[1200px] mx-auto">
+            <motion.div
+              className="flex gap-6"
+              animate={{ x }}
+              transition={
+                animate
+                  ? { type: 'spring', stiffness: 170, damping: 24 }
+                  : { duration: 0 }
+              }
+            >
+              {LOOPED.map((industry, i) => {
+                const isActive = i === index;
 
-                  <p className="text-sm text-muted-foreground mb-3">
-                    {industry.description}
-                  </p>
+                return (
+                  <motion.div
+  key={`${industry.title}-${i}`}
+  style={{ width: CARD_WIDTH }}
+  className="flex-shrink-0 relative"
+  whileHover={
+    isActive
+      ? { scale: 1.02 }
+      : {}
+  }
+  transition={{ duration: 0.25, ease: 'easeOut' }}
+  animate={{
+    scale: isActive ? 1 : 0.82,
+    opacity: isActive ? 1 : 0.4,
+    filter: isActive ? 'blur(0px)' : 'blur(2px)',
+  }}
+>
 
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-display font-bold">{industry.title}</h3>
-                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                  </div>
-                </motion.div>
-              </motion.div>
-            ))}
+                    <div className="glass-card p-6 h-full cursor-pointer">
+                      <div
+                        className={`h-44 rounded-xl bg-gradient-to-br ${industry.gradient} mb-6 flex items-center justify-center`}
+                      >
+                        <Play className="w-12 h-12 text-background/50" />
+                      </div>
+
+                      <p className="text-sm text-muted-foreground mb-3">
+                        {industry.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-display font-bold">
+                          {industry.title}
+                        </h3>
+                        <ArrowRight className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </div>
+
+          {/* Dots */}
+          <div className="flex justify-center gap-2 mt-8">
+            {industries.map((_, i) => {
+              const realIndex = index % industries.length;
+              return (
+                <motion.button
+                  key={i}
+                  onClick={() => setIndex(START_INDEX + i)}
+                  className="w-2.5 h-2.5 rounded-full"
+                  animate={{
+                    backgroundColor:
+                      realIndex === i
+                        ? 'hsl(var(--primary))'
+                        : 'hsl(var(--muted))',
+                    scale: realIndex === i ? 1.3 : 1,
+                  }}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
